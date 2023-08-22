@@ -123,33 +123,3 @@ const handleSinglePage = async (cursor?: string): Promise<string | undefined> =>
 
   return response.body.paging?.next?.after;
 };
-
-const handleSingleContact = async (contact: HubspotRecord) => {
-  console.log(`Handling contact ${contact.id}`, contact);
-  await prisma.$transaction(
-    async (tx) => {
-      await tx.contactToAccount.deleteMany({
-        where: {
-          contactId: contact.id,
-        },
-      });
-      if (contact.associations?.companies?.results.length) {
-        await tx.contactToAccount.createMany({
-          data: contact.associations.companies.results.map((company) => ({
-            customerId: CUSTOMER_ID,
-            contactId: contact.id,
-            accountId: company.id,
-            metadata: {
-              type: company.type,
-            },
-            lastModifiedAt: new Date(),
-          })),
-        });
-      }
-    },
-    {
-      maxWait: 5000, // default: 2000
-      timeout: 10000, // default: 5000
-    },
-  );
-};
