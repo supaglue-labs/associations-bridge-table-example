@@ -44,7 +44,7 @@ const PROVIDER_NAME = process.env.PROVIDER_NAME;
 // Create a client to send and receive events
 export const inngest = new Inngest({ name: 'My App' });
 
-const transformedSyncedData = inngest.createFunction(
+const syncAssociations = inngest.createFunction(
   { name: 'Sync contact to company associations' },
   { cron: 'TZ=US/Pacific 49 * * * *' }, // Once an hour
   async ({ step }) => {
@@ -58,7 +58,7 @@ const transformedSyncedData = inngest.createFunction(
 );
 
 // Create an API that serves zero functions
-export default serve(inngest, [transformedSyncedData]);
+export default serve(inngest, [syncAssociations]);
 
 const handleAllPages = async () => {
   let cursor: string | undefined;
@@ -119,7 +119,6 @@ const handleSinglePage = async (cursor?: string): Promise<string | undefined> =>
   );
 
   console.log(`Upserted ${count} records`);
-  console.log(`response.paging: ${JSON.stringify(response.body?.paging, null, 2)}`);
 
   return response.body.paging?.next?.after;
 };
